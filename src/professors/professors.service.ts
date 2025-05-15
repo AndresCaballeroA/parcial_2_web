@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Professor } from './professor.entity';
@@ -11,9 +7,7 @@ import { ProjectsService } from '../projects/projects.service';
 
 @Injectable()
 export class ProfessorsService {
-  constructor(
-    @InjectRepository(Professor) private readonly repo: Repository<Professor>,
-  ) {}
+  constructor(@InjectRepository(Professor) private readonly repo: Repository<Professor>) {}
 
   create(dto: CreateProfessorDto) {
     return this.repo.save(this.repo.create(dto));

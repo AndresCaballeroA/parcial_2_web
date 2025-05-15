@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Evaluation } from './evaluation.entity';
@@ -26,10 +22,7 @@ export class EvaluationsService {
       throw new BadRequestException('El mentor no puede evaluarse a sí mismo');
     }
 
-    if (
-      profesor.evaluaciones?.filter((e) => e.proyecto.id === proyecto.id)
-        .length > 0
-    ) {
+    if (profesor.evaluaciones?.filter((e) => e.proyecto.id === proyecto.id).length > 0) {
       throw new BadRequestException('Profesor ya evaluó este proyecto');
     }
 
@@ -45,9 +38,7 @@ export class EvaluationsService {
     const califs = await this.repo.find({
       where: { proyecto: { id: proyecto.id } },
     });
-    const avg =
-      califs.reduce((acc, e) => acc + Number(e.calificacion), 0) /
-      califs.length;
+    const avg = califs.reduce((acc, e) => acc + Number(e.calificacion), 0) / califs.length;
     proyecto.notaFinal = Number(avg.toFixed(2));
     await this.projectsSrv['repo'].save(proyecto);
     return saved;
