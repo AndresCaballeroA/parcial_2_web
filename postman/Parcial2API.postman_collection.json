@@ -1,0 +1,216 @@
+{
+  "info": {
+    "_postman_id": "47b0e47f-0d8c-44bf-980d-4b0fa1fb9e56",
+    "name": "Parcial 2 – API (Nest JS)",
+    "description": "Colección con ejemplos y pruebas automáticas para Estudiantes, Profesores, Proyectos y Evaluaciones.\nVariables:\n  {{base_url}} → http://localhost:3000\n  {{stud_id}}, {{prof_id}}, {{proj_id}} se generan durante la ejecución.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "base_url", "value": "http://localhost:3000" }],
+  "item": [
+
+    {
+      "name": "Estudiantes",
+      "item": [
+        {
+          "name": "Crear estudiante – positivo",
+          "event": [
+            { "listen": "prerequest", "script": { "exec": [
+              "pm.variables.set('cedula_uni', Math.floor(100000 + Math.random()*900000));"
+            ], "type": "text/javascript" } },
+            { "listen": "test", "script": { "exec": [
+              "pm.test('201', ()=>pm.response.to.have.status(201));",
+              "pm.environment.set('stud_id', pm.response.json().id);"
+            ], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw":
+"{\n  \"cedula\": {{cedula_uni}},\n  \"nombre\": \"Ada\",\n  \"semestre\": 5,\n  \"promedio\": 3.8,\n  \"programa\": \"ISIS\"\n}" },
+            "url": "{{base_url}}/estudiantes"
+          }
+        },
+        {
+          "name": "Crear estudiante – negativo (promedio < 3.2)",
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('400', ()=>pm.response.to.have.status(400));"
+            ], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw":
+"{\n  \"cedula\": 888888,\n  \"nombre\": \"Bad\",\n  \"semestre\": 4,\n  \"promedio\": 2.5,\n  \"programa\": \"ISIS\"\n}" },
+            "url": "{{base_url}}/estudiantes"
+          }
+        },
+        { "name": "Listar estudiantes",
+          "request": { "method": "GET", "url": "{{base_url}}/estudiantes" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200', ()=>pm.response.to.have.status(200));"
+          ], "type": "text/javascript" } }] },
+        { "name": "Obtener estudiante por ID",
+          "request": { "method": "GET", "url": "{{base_url}}/estudiantes/{{stud_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200', ()=>pm.response.to.have.status(200));"
+          ], "type": "text/javascript" } }] }
+      ]
+    },
+
+    {
+      "name": "Profesores",
+      "item": [
+{
+  "name": "Crear profesor – positivo",
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// cédula única de 9 dígitos",
+          "pm.variables.set('ced_prof', Date.now() % 900000000 + 100000000);",
+          "// extensión de 5 dígitos (10000-99999)",
+          "pm.variables.set('ext5', Math.floor(10000 + Math.random() * 90000));"
+        ],
+        "type": "text/javascript"
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Aceptamos 201 o 400 duplicado",
+          "pm.test('201 o 400', () => pm.expect([201,400]).to.include(pm.response.code));",
+          "",
+          "if (pm.response.code === 201) {",
+          "  pm.environment.set('prof_id', pm.response.json().id);",
+          "} else {",
+          "  /* 400 duplicado → obtener un evaluador existente */",
+          "  const base = pm.variables.get('base_url');",
+          "  pm.sendRequest(base + '/profesores', (err, res) => {",
+          "    if (!err && res.code === 200) {",
+          "      const par = res.json().find(p => p.esParEvaluador) || res.json()[0];",
+          "      pm.environment.set('prof_id', par.id);",
+          "    }",
+          "  });",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "header": [{ "key": "Content-Type", "value": "application/json" }],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"cedula\": {{ced_prof}},\n  \"nombre\": \"Grace\",\n  \"departamento\": \"Sistemas\",\n  \"extension\": {{ext5}},\n  \"esParEvaluador\": true\n}"
+    },
+    "url": "{{base_url}}/profesores"
+  }
+}
+,
+        {
+          "name": "Crear profesor – negativo (extensión ≠ 5)",
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('400', ()=>pm.response.to.have.status(400));"
+            ], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw":
+"{\n  \"cedula\": 999999,\n  \"nombre\": \"BadExt\",\n  \"departamento\": \"Sistemas\",\n  \"extension\": 12,\n  \"esParEvaluador\": true\n}" },
+            "url": "{{base_url}}/profesores"
+          }
+        },
+        { "name": "Listar profesores",
+          "request": { "method": "GET", "url": "{{base_url}}/profesores" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200', ()=>pm.response.to.have.status(200));"
+          ], "type": "text/javascript" } }] }
+      ]
+    },
+
+    {
+      "name": "Proyectos",
+      "item": [
+        {
+          "name": "Crear proyecto – positivo",
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('201', ()=>pm.response.to.have.status(201));",
+              "pm.environment.set('proj_id', pm.response.json().id);"
+            ], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw":
+"{\n  \"titulo\": \"Plataforma IA para predicción climática\",\n  \"area\": \"IA\",\n  \"presupuesto\": 15000,\n  \"fechaInicio\": \"2025-05-01\",\n  \"fechaFin\": \"2025-06-30\",\n  \"liderId\": {{stud_id}}\n}" },
+            "url": "{{base_url}}/proyectos"
+          }
+        },
+        {
+          "name": "Avanzar proyecto",
+          "request": { "method": "PUT", "url": "{{base_url}}/proyectos/{{proj_id}}/avanzar" },
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('200', ()=>pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().estado).to.be.above(0);"
+            ], "type": "text/javascript" } }
+          ]
+        },
+        { "name": "Listar proyectos",
+          "request": { "method": "GET", "url": "{{base_url}}/proyectos" },
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('200', ()=>pm.response.to.have.status(200));"
+            ], "type": "text/javascript" } }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "Evaluaciones",
+      "item": [
+        {
+  "name": "Crear evaluación",
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// válidos: 201 (creada) o 400 (regla de negocio)",
+          "pm.test('201 ó 400', ()=>pm.expect([201,400]).to.include(pm.response.code));"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "header": [{ "key": "Content-Type", "value": "application/json" }],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"proyectoId\": {{proj_id}},\n  \"profesorId\": {{prof_id}},\n  \"calificacion\": 4.5,\n  \"comentario\": \"Muy buen trabajo\"\n}"
+    },
+    "url": "{{base_url}}/evaluaciones"
+  }
+}
+,
+        { "name": "Listar evaluaciones",
+          "request": { "method": "GET", "url": "{{base_url}}/evaluaciones" },
+          "event": [
+            { "listen": "test", "script": { "exec": [
+              "pm.test('200', ()=>pm.response.to.have.status(200));"
+            ], "type": "text/javascript" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

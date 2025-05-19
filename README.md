@@ -1,98 +1,141 @@
+````markdown
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="https://nestjs.com/">
+    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  </a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<h2 align="center">Parcial 2 – API Nest JS + TypeORM + PostgreSQL</h2>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Índice
+1. [Descripción](#descripción)
+2. [Controladores (15 %)](#controladores-15-)
+3. [Pruebas de lógica (15 %)](#pruebas-de-lógica-15-)
+4. [Colección & Pruebas Postman (10 %)](#colección--pruebas-postman-10-)
+5. [Instalación y ejecución](#instalación-y-ejecución)
+6. [Comandos npm](#comandos-npm)
+7. [Despliegue](#despliegue)
+8. [Recursos](#recursos)
+9. [Licencia](#licencia)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## Descripción
+API REST para gestionar **Estudiantes, Profesores, Proyectos y Evaluaciones**  
+construida en **Nest JS 11** + **TypeORM 0.3** + **PostgreSQL**.  
+DDD modular, DTOs validados con `class-validator` 0.14.
+
+---
+
+## Controladores (15 %)
+| Módulo | Endpoints | Comentarios |
+|--------|-----------|-------------|
+| **Estudiantes** | `POST /estudiantes` · `GET /estudiantes` · `GET /:id` · `DELETE /:id` | Reglas: promedio ≥ 3.2 |
+| **Profesores**  | `POST /profesores` · `GET /profesores` · `GET /:id` · `PUT /:id/asignar-evaluador/:proyectoId` | Extensión = 5 dígitos, ≤ 3 evaluaciones |
+| **Proyectos**   | `POST /proyectos` · `GET /proyectos` · `GET /:id` · `PUT /:id/avanzar` · `GET /:id/estudiantes` | Título > 15 car.; avanza 0→4 |
+| **Evaluaciones**| `POST /evaluaciones` · `GET /evaluaciones` · `GET /:id` | Calificación 0-5 |
+
+---
+
+## Pruebas de lógica (15 %)
+| Servicio | Positivo | Negativo |
+|----------|----------|----------|
+| `StudentsService`    | Crear estudiante válido. | Promedio < 3.2. |
+| `ProfessorsService`  | Crear profesor válido.   | Extensión ≠ 5 dígitos. |
+| `ProjectsService`    | Crear proyecto OK.       | Presupuesto = 0. |
+| `EvaluationsService` | Crear evaluación OK.     | Calificación > 5. |
+
+### Ejecutar
+```bash
+npm run test         # unit tests (12/12 verde)
+npm run test:e2e     # Supertest /estudiantes (200)
+````
+
+#### Cobertura ![coverage badge](./docs/coverage-badge.svg) 
+
+---
+
+## Colección & Pruebas Postman (10 %)
+
+| Archivo                                           | Propósito                              |
+| ------------------------------------------------- | -------------------------------------- |
+| **`postman/Parcial2API.postman_collection.json`** | Ejemplos de peticiones y respuestas.   |
+| **`postman/report.html`**                         | Reporte htmlextra generado por Newman. |
+
+![Reporte Postman](image-1.png)
+
+### Ejecutar
 
 ```bash
-$ npm install
+# terminal 1 – API en caliente
+npm run start:dev
+
+# terminal 2 – colección + reporte
+npm run postman
 ```
 
-## Compile and run the project
+#### Ejemplo de reporte
+
+![Pruebas 'npm run test'](image-2.png)
+![Pruebas 'npm run test:e2e'](image-3.png)
+
+**Por qué estos casos**
+
+* *Positivos* → comprueban que la API responde 201/200 con datos válidos.
+* *Negativos* → confirman reglas de negocio devolviendo 400.
+* Tiempo < 500 ms → alerta de performance básica.
+
+---
+
+## Instalación y ejecución
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <repo>
+cd parcial_2_web
+cp .env.example .env   # configura DB y PORT
+npm install
+npm run start:dev      # http://localhost:3000
 ```
 
-## Run tests
+---
+
+## Comandos npm
+
+| Script                         | Acción                                           |
+| ------------------------------ | ------------------------------------------------ |
+| `start:dev`                    | Servidor con recarga                             |
+| `test`, `test:e2e`, `test:cov` | Unit, e2e, cobertura                             |
+| `lint`, `format`               | ESLint + Prettier                                |
+| `postman`                      | Ejecuta colección y genera `postman/report.html` |
+
+---
+
+## Despliegue
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run build
+npm run start:prod   # dist/main.js
 ```
 
-## Deployment
+> O usar Docker / PM2. Más detalles en `docs/deploy.md`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Recursos
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+* [NestJS Docs](https://docs.nestjs.com)
+* [TypeORM Docs](https://typeorm.io)
+* [Newman htmlextra](https://github.com/DannyDainton/newman-reporter-htmlextra)
+
+---
+
+## Licencia
+
+MIT © 2025
+
+<!-- END README -->
+
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```

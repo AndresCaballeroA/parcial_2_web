@@ -24,7 +24,7 @@ export class Project {
   fechaFin: string;
 
   @Column({ default: 0 })
-  estado: number; // 0..4
+  estado: number;
 
   @Column({ type: 'decimal', precision: 3, scale: 2, nullable: true })
   notaFinal: number;

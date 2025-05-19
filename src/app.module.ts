@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StudentsModule } from './students/students.module';
@@ -12,7 +13,7 @@ import { EvaluationsModule } from './evaluations/evaluations.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
+      port: parseInt(process.env.DB_PORT ?? '5432', 10),  
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
@@ -25,5 +26,7 @@ import { EvaluationsModule } from './evaluations/evaluations.module';
     ProjectsModule,
     EvaluationsModule,
   ],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}

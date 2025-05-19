@@ -33,8 +33,7 @@ export class EvaluationsService {
       profesor,
     });
     const saved = await this.repo.save(evaluation);
-
-    // actualizar nota final del proyecto (promedio simple)
+    
     const califs = await this.repo.find({
       where: { proyecto: { id: proyecto.id } },
     });

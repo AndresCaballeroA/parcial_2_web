@@ -9,8 +9,14 @@ import { ProjectsService } from '../projects/projects.service';
 export class ProfessorsService {
   constructor(@InjectRepository(Professor) private readonly repo: Repository<Professor>) {}
 
-  create(dto: CreateProfessorDto) {
-    return this.repo.save(this.repo.create(dto));
+  
+  async create(dto: CreateProfessorDto): Promise<Professor> {
+    const ext = dto.extension?.toString() ?? '';
+    if (ext.length !== 5) {
+      throw new BadRequestException('La extensión debe tener 5 dígitos');
+    }
+    const entity = this.repo.create(dto);
+    return this.repo.save(entity);
   }
 
   findAll() {
@@ -31,7 +37,7 @@ export class ProfessorsService {
     if (prof.evaluaciones?.length >= 3) {
       throw new BadRequestException('Profesor ya tiene 3 evaluaciones activas');
     }
-    // la lógica real se implementa en EvaluationsService al crear evaluación
+    
     return prof;
   }
 }
